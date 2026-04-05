@@ -1,1 +1,248 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tontine 2025</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0a0a0f;
+    color: #e8e6f0;
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+  }
+  .glow {
+    position: fixed; top: -200px; left: 50%; transform: translateX(-50%);
+    width: 700px; height: 500px; z-index: 0; pointer-events: none;
+    background: radial-gradient(ellipse at center, rgba(130,80,255,0.15) 0%, transparent 70%);
+  }
+  .wrap { position: relative; z-index: 1; max-width: 560px; margin: 0 auto; padding: 48px 20px 64px; }
+  .badge {
+    display: inline-block;
+    background: rgba(130,80,255,0.15);
+    border: 1px solid rgba(130,80,255,0.3);
+    color: #a78bfa; font-size: 11px; font-weight: 500;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    padding: 4px 12px; border-radius: 99px; margin-bottom: 16px;
+  }
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(36px, 8vw, 58px); font-weight: 800;
+    line-height: 1; letter-spacing: -0.03em;
+    background: linear-gradient(135deg, #fff 30%, #a78bfa 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    margin-bottom: 8px;
+  }
+  .subtitle { color: #6b6880; font-size: 14px; font-weight: 300; margin-top: 10px; margin-bottom: 40px; }
+  .card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 16px; padding: 20px 22px; margin-bottom: 12px;
+    transition: border-color 0.2s;
+  }
+  .card:hover { border-color: rgba(167,139,250,0.25); }
+  .card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+  .nom { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; color: #f0eeff; }
+  .score { font-size: 12px; font-weight: 500; color: #6b6880; }
+  .score span { color: #a78bfa; font-weight: 600; }
+  .track { height: 6px; background: rgba(255,255,255,0.06); border-radius: 99px; overflow: hidden; margin-bottom: 14px; }
+  .fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, #7c3aed, #a78bfa); transition: width 0.8s cubic-bezier(.16,1,.3,1); }
+  .fill.complet { background: linear-gradient(90deg, #059669, #34d399); }
+  .mois-row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .pill {
+    font-size: 11px; font-weight: 500; padding: 3px 10px;
+    border-radius: 99px; letter-spacing: 0.02em;
+    cursor: default;
+  }
+  .pill.ok { background: rgba(52,211,153,0.12); color: #34d399; border: 1px solid rgba(52,211,153,0.2); }
+  .pill.non { background: rgba(255,255,255,0.04); color: #3d3a4e; border: 1px solid rgba(255,255,255,0.06); }
 
+  /* Admin */
+  .pill.clickable { cursor: pointer; transition: transform 0.1s; }
+  .pill.clickable:hover { transform: scale(1.08); }
+  .pill.ok.clickable:hover { background: rgba(52,211,153,0.25); }
+  .pill.non.clickable:hover { background: rgba(255,255,255,0.1); color: #888; }
+
+  .footer { text-align: center; margin-top: 40px; font-size: 12px; color: #3d3a4e; }
+  .footer a { color: #6b6880; text-decoration: none; cursor: pointer; }
+  .footer a:hover { color: #a78bfa; }
+
+  /* Login modal */
+  .modal-bg {
+    display: none; position: fixed; inset: 0; z-index: 100;
+    background: rgba(0,0,0,0.7); align-items: center; justify-content: center;
+  }
+  .modal-bg.open { display: flex; }
+  .modal {
+    background: #13121a; border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px; padding: 36px; width: 100%; max-width: 360px; text-align: center;
+  }
+  .modal h2 { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; margin-bottom: 6px; }
+  .modal p { color: #6b6880; font-size: 13px; margin-bottom: 24px; }
+  input[type=password] {
+    width: 100%; background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1); border-radius: 10px;
+    padding: 13px 16px; color: #e8e6f0; font-size: 15px;
+    font-family: 'DM Sans', sans-serif; outline: none; margin-bottom: 12px;
+    transition: border-color 0.2s;
+  }
+  input[type=password]:focus { border-color: rgba(167,139,250,0.5); }
+  input[type=password].err { border-color: rgba(239,68,68,0.5); animation: shake 0.3s; }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+  .btn {
+    width: 100%; background: linear-gradient(135deg, #7c3aed, #a78bfa);
+    color: white; border: none; border-radius: 10px; padding: 13px;
+    font-size: 15px; font-weight: 500; font-family: 'DM Sans', sans-serif;
+    cursor: pointer; transition: opacity 0.2s;
+  }
+  .btn:hover { opacity: 0.9; }
+  .btn.save-btn {
+    width: auto; padding: 11px 28px; display: block;
+    margin: 20px 0 0 auto;
+  }
+  .btn.saved { background: linear-gradient(135deg, #059669, #34d399); }
+  .btn.cancel { background: transparent; color: #6b6880; margin-top: 8px; }
+  .btn.cancel:hover { color: #a78bfa; opacity: 1; }
+  .admin-bar {
+    display: none; background: rgba(167,139,250,0.08);
+    border: 1px solid rgba(167,139,250,0.2);
+    border-radius: 10px; padding: 10px 16px;
+    margin-bottom: 20px; font-size: 13px; color: #a78bfa;
+    justify-content: space-between; align-items: center;
+  }
+  .admin-bar.open { display: flex; }
+  .admin-bar span { color: #6b6880; font-size: 12px; }
+  .loading { text-align: center; color: #6b6880; padding: 60px 0; font-size: 14px; }
+</style>
+</head>
+<body>
+
+<div class="glow"></div>
+
+<!-- Login modal -->
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <h2>Zone Admin</h2>
+    <p>Entrez le mot de passe pour modifier les cotisations</p>
+    <input type="password" id="pwd-input" placeholder="Mot de passe">
+    <button class="btn" onclick="tryLogin()">Accéder →</button>
+    <button class="btn cancel" onclick="closeModal()">Annuler</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="badge">Tontine 2025</div>
+  <h1>Cotisations</h1>
+  <p class="subtitle">15€ / mois · Janvier → Juin · 7 membres</p>
+
+  <div class="admin-bar" id="admin-bar">
+    <span>✦ Mode admin — cliquez les mois pour basculer</span>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="btn save-btn" id="save-btn" onclick="sauvegarder()" style="margin:0;padding:8px 18px;font-size:12px">Sauvegarder</button>
+      <a onclick="logout()" style="color:#6b6880;font-size:12px;cursor:pointer">Déconnexion</a>
+    </div>
+  </div>
+
+  <div id="liste"><div class="loading">Chargement...</div></div>
+
+  <div class="footer">
+    Mis à jour automatiquement · <a onclick="openModal()">Admin</a>
+  </div>
+</div>
+
+<script>
+const MEMBRES = ['Pionz','Ado','Zyggy','Ced','Diplo','Sam','Stone'];
+const MOIS = ['Janvier','Février','Mars','Avril','Mai','Juin'];
+const PWD = 'tontine2025';
+
+let data = {};
+let isAdmin = false;
+
+async function charger() {
+  try {
+    const res = await fetch('/api/data');
+    data = await res.json();
+  } catch(e) { data = {}; }
+  render();
+}
+
+function render() {
+  const liste = document.getElementById('liste');
+  liste.innerHTML = MEMBRES.map(nom => {
+    const cotis = MOIS.map((_, i) => !!(data[nom] && data[nom][i]));
+    const total = cotis.filter(Boolean).length;
+    const pct = Math.round(total / MOIS.length * 100);
+    const cls = total === MOIS.length ? 'complet' : '';
+    const pills = MOIS.map((m, i) => {
+      const ok = cotis[i];
+      const clickable = isAdmin ? 'clickable' : '';
+      const onclick = isAdmin ? `onclick="toggle('${nom}',${i})"` : '';
+      return `<span class="pill ${ok?'ok':'non'} ${clickable}" ${onclick}>${ok?'✓':'·'} ${m.slice(0,3)}</span>`;
+    }).join('');
+    return `
+      <div class="card">
+        <div class="card-top">
+          <span class="nom">${nom}</span>
+          <span class="score"><span>${total}</span>/${MOIS.length} mois</span>
+        </div>
+        <div class="track"><div class="fill ${cls}" style="width:${pct}%"></div></div>
+        <div class="mois-row">${pills}</div>
+      </div>`;
+  }).join('');
+}
+
+function toggle(nom, i) {
+  if (!data[nom]) data[nom] = {};
+  data[nom][i] = !data[nom][i];
+  document.getElementById('save-btn').textContent = 'Sauvegarder';
+  document.getElementById('save-btn').className = 'btn save-btn';
+  render();
+}
+
+async function sauvegarder() {
+  const btn = document.getElementById('save-btn');
+  btn.textContent = '...';
+  await fetch('/api/data', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ pwd: PWD, data })
+  });
+  btn.textContent = '✓ Sauvegardé !';
+  btn.className = 'btn save-btn saved';
+  setTimeout(() => {
+    btn.textContent = 'Sauvegarder';
+    btn.className = 'btn save-btn';
+  }, 3000);
+}
+
+function openModal() { document.getElementById('modal').classList.add('open'); setTimeout(()=>document.getElementById('pwd-input').focus(),100); }
+function closeModal() { document.getElementById('modal').classList.remove('open'); document.getElementById('pwd-input').value=''; }
+
+function tryLogin() {
+  const val = document.getElementById('pwd-input').value;
+  if (val === PWD) {
+    isAdmin = true;
+    closeModal();
+    document.getElementById('admin-bar').classList.add('open');
+    render();
+  } else {
+    const inp = document.getElementById('pwd-input');
+    inp.classList.add('err');
+    setTimeout(() => inp.classList.remove('err'), 500);
+  }
+}
+
+function logout() {
+  isAdmin = false;
+  document.getElementById('admin-bar').classList.remove('open');
+  render();
+}
+
+document.getElementById('pwd-input').addEventListener('keydown', e => { if(e.key==='Enter') tryLogin(); });
+
+charger();
+</script>
+</body>
+</html>
